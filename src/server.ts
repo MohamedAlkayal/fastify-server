@@ -1,4 +1,5 @@
 import fastify from 'fastify';
+import cors from '@fastify/cors';
 import search from './routes/search';
 import { connectDB } from './db';
 import dotenv from 'dotenv';
@@ -9,8 +10,12 @@ dotenv.config();
 
 const server = fastify({ logger: true });
 
+server.register(cors, {
+  origin: process.env.CLIENT_URL || '*',
+  credentials: true
+});
 server.register(rateLimit, {
-  max: 100, // max requests per time window
+  max: 100,
   timeWindow: '1 minute',
   errorResponseBuilder: (req: FastifyRequest, context: any) => {
     return {
@@ -29,8 +34,8 @@ const start = async () => {
       throw new Error('DB_URI not found in environment variables');
     }
     await connectDB(dbUri);
-    await server.listen({ port: 3000, host: '0.0.0.0' });
-    console.log('Server is running at http://localhost:3000');
+    await server.listen({ port: 5050, host: '0.0.0.0' });
+    console.log('Server is running at http://localhost:5050');
   } catch (err) {
     server.log.error(err);
     process.exit(1);
