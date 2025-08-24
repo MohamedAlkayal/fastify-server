@@ -1,9 +1,13 @@
-import fetch from 'node-fetch';
 import { FastifyInstance, FastifyPluginOptions, FastifyRequest, FastifyReply } from 'fastify';
 import CachedSearchResult from '../schemas/CachedSearchResultModel';
 import crypto from 'crypto';
 import geoip from 'geoip-lite';
 import SearchAnalytics from '../schemas/SearchAnalyticsModel';
+
+const fetchApi = async (url: string) => {
+  const { default: fetch } = await import('node-fetch');
+  return fetch(url);
+};
 
 export default async function (
   fastify: FastifyInstance,
@@ -69,7 +73,7 @@ export default async function (
     });
 
     const url = `https://itunes.apple.com/search?${params.toString()}`;
-    const response = await fetch(url);
+    const response = await fetchApi(url);
     const data = await response.json() as { results: any[] };
 
     const timestamp = now.toISOString();
@@ -160,7 +164,7 @@ export default async function (
     });
 
     const url = `https://itunes.apple.com/search?${params.toString()}`;
-    const response = await fetch(url);
+    const response = await fetchApi(url);
     const data = await response.json() as { results: any[] };
 
     const timestamp = now.toISOString();
