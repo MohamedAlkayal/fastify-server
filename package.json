@@ -4,7 +4,7 @@
   "description": "A simple Fastify server that responds with Hello World",
   "main": "src/server.ts",
   "scripts": {
-    "start": "ts-node src/server.ts",
+    "start": "node dist/server.js",
     "build": "tsc",
     "dev": "ts-node-dev src/server.ts"
   },

@@ -8,8 +8,10 @@ import rateLimit from '@fastify/rate-limit';
 
 dotenv.config();
 
+// Create server instance
 const server = fastify({ logger: true });
 
+// Register plugins
 server.register(cors, {
   origin: process.env.CLIENT_URL || '*',
   credentials: true
@@ -27,19 +29,28 @@ server.register(rateLimit, {
 });
 server.register(search);
 
-const start = async () => {
-  try {
-    const dbUri = process.env.DB_URI;
-    if (!dbUri) {
-      throw new Error('DB_URI not found in environment variables');
-    }
-    await connectDB(dbUri);
-    await server.listen({ port: 5050, host: '0.0.0.0' });
-    console.log('Server is running at http://localhost:5050');
-  } catch (err) {
-    server.log.error(err);
-    process.exit(1);
-  }
-};
+// Connect to the database
+const dbUri = process.env.DB_URI;
+if (dbUri) {
+  connectDB(dbUri).catch(console.error);
+}
 
-start();
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const start = async () => {
+    try {
+      await server.listen({ port: 5050, host: '0.0.0.0' });
+      console.log('Server is running at http://localhost:5050');
+    } catch (err) {
+      server.log.error(err);
+      process.exit(1);
+    }
+  };
+  start();
+}
+
+// Export for Vercel serverless function
+export default async (req: any, res: any) => {
+  await server.ready();
+  server.server.emit('request', req, res);
+};
